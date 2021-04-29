@@ -2,7 +2,7 @@ import { Controller, Logger } from '@nestjs/common';
 import {
   Ctx,
   MessagePattern,
-  NatsContext,
+  RmqContext,
   Payload,
 } from '@nestjs/microservices';
 import { AppService } from './app.service';
@@ -14,9 +14,10 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @MessagePattern({ cmd: 'hello' })
-  getHello(@Payload() data: any, @Ctx() context: NatsContext): string {
-    this.logger.log(`Received message: ${JSON.stringify(data)}`);
-    this.logger.log(`Message context: ${JSON.stringify(context)}`);
-    return `Hello, ${data.name || 'there'}`;
+  getHello(@Payload() data: any, @Ctx() context: RmqContext) {
+    console.log(data);
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    channel.ack(originalMsg);
   }
 }
