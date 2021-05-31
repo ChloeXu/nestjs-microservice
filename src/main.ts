@@ -7,18 +7,20 @@ async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
-      transport: Transport.RMQ,
+      transport: Transport.KAFKA,
       options: {
-        urls: ['amqp://localhost:5672'],
-        queue: 'cats_queue',
-        noAck: false,
-        queueOptions: {
-          durable: false,
+        client: {
+          brokers: ['localhost:9092'],
+        },
+        consumer: {
+          groupId: 'kafka-consumer',
         },
       },
     },
   );
 
-  await app.listen(() => console.log('Microservice listening on port:', port));
+  await app.listen(() =>
+    console.log('Kafka consumer service is listening on port:', port),
+  );
 }
 bootstrap();
